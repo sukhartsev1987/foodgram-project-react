@@ -84,7 +84,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             cd foodgram
-            sudo docker compose -f docker-compose.production.yml down
+            sudo docker compose -f docker-compose.yml down
             sudo docker pull suhartsev/frontend:latest
             sudo docker pull suhartsev/backend:latest
             rm -f .env
@@ -95,7 +95,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            sudo docker compose -f docker-compose.production.yml up -d 
+            sudo docker compose -f docker-compose.yml up -d 
 
   send_message:
     runs-on: ubuntu-latest
