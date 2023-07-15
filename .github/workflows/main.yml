@@ -2,12 +2,11 @@ name: Foodgram Workflow
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
     paths-ignore:
       - '**/README.md'
 
 jobs:
-
   tests:
     name: PEP8 check
     runs-on: ubuntu-latest
@@ -73,7 +72,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build_and_push_to_docker_hub
+    needs:
+      - build_and_push_backend_to_docker_hub
     steps:
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
@@ -100,9 +100,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: deploy
     steps:
-    - name: send message
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.TELEGRAM_TO }}
-        token: ${{ secrets.TELEGRAM_TOKEN }}
-        message: ${{ github.workflow }} успешно выполнен!
+      - name: send message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ${{ github.workflow }} успешно выполнен!
