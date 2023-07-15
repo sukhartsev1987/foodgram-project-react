@@ -1,4 +1,3 @@
-from colorfield.fields import ColorField
 from django.conf import settings
 from django.core.validators import (
     MaxValueValidator,
@@ -43,7 +42,7 @@ class Tag(models.Model):
         db_index=True,
         unique=True
     )
-    color = ColorField(
+    color = models.CharField(
         verbose_name='HEX-код',
         format='hex',
         max_length=7,
@@ -100,7 +99,7 @@ class Recipe(models.Model):
         validators=[MinValueValidator(
             1, message='Время приготовления не менее 1 минуты!'
         ), MaxValueValidator(
-            1441, message='Время приготовления не более 12 часов!'
+            720, message='Время приготовления не более 12 часов!'
         )]
     )
     pub_date = models.DateTimeField(
@@ -177,12 +176,6 @@ class IngredientRecipe(models.Model):
     )
 
     class Meta:
-        ordering = ('-id', )
+        ordering = ('-id',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты рецепта'
-
-    def __str__(self):
-        return (
-            f'{self.ingredient.name} :: {self.ingredient.measurement_unit}'
-            f' - {self.amount} '
-        )

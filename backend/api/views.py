@@ -21,7 +21,7 @@ from recipes.models import (
 )
 from users.models import Follow, User
 from api.filters import IngredientFilter, RecipeFilter
-from api.pagination import CustomPagination
+from api.pagination import PageLimitPagination
 from api.permissions import AuthorPermission
 from api.serializers import (
     SubscribeListSerializer,
@@ -52,7 +52,7 @@ class TagViewSet(viewsets.ModelViewSet):
 class UserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = CustomPagination
+    pagination_class = PageLimitPagination
 
     @action(
         detail=True,
@@ -100,7 +100,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
     permission_classes = (AuthorPermission,)
-    pagination_class = CustomPagination
+    pagination_class = PageLimitPagination
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
