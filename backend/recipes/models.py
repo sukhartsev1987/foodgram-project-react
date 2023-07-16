@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core.validators import (
     MaxValueValidator,
     MinValueValidator,
-    RegexValidator
+    # RegexValidator
 )
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -44,15 +44,15 @@ class Tag(models.Model):
     )
     color = models.CharField(
         verbose_name='HEX-код',
-        format='hex',
+        # format='hex',
         max_length=7,
         unique=True,
-        validators=[
-            RegexValidator(
-                regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
-                message='Проверьте вводимый формат',
-            )
-        ],
+        # validators=[
+        #     RegexValidator(
+        #         regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+        #         message='Проверьте вводимый формат',
+        #     )
+        # ],
     )
     slug = models.SlugField(
         max_length=settings.LENGTH_TEXT_150,
