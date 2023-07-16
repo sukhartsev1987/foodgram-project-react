@@ -11,7 +11,7 @@
 
 ### Подготовка и запуск проекта на сервере.
 У вас должен быть установлен Docker и вы должны быть зарегистрированы на [DockerHub](https://hub.docker.com/)
-- Клонировать проект с помощью git clone git@github.com:sukhartsev1987/foodgram-project-react.git.
+- Клонировать проект с помощью `git clone git@github.com:sukhartsev1987/foodgram-project-react.git`
 - Перейти в папку \foodgram-project-react\backend и выполнить команды:
 ```bash
 sudo docker build -t <логин на DockerHub>/<название образа для бэкенда, какое хотите)> .
@@ -93,7 +93,7 @@ TELEGRAM_TOKEN=<токен вашего бота>
     ```
   * Загрузить подготовленный список ингредиентов
     ```bash
-    sudo docker-compose exec backend python manage.py loaddata ingredients.json
+    sudo docker-compose exec backend python manage.py loaddata import_ingredients
     ```
 
 - Проект будет доступен по вашему IP-адресу или домену.
