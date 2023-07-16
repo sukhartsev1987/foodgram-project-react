@@ -12,16 +12,29 @@ from recipes.models import (
 
 class IngredientInline(admin.TabularInline):
     model = IngredientRecipe
-    extra = 3
     min_num = 1
+    extra = 3
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('author', 'name', 'cooking_time',
-                    'get_favorites', 'get_ingredients',)
-    search_fields = ('name', 'author', 'tags')
-    list_filter = ('author', 'name', 'tags')
+    list_display = (
+        'get_ingredients',
+        'get_favorites',
+        'cooking_time',
+        'author',
+        'name',
+    )
+    search_fields = (
+        'author',
+        'name',
+        'tags'
+    )
+    list_filter = (
+        'author',
+        'name',
+        'tags'
+    )
     inlines = (IngredientInline,)
     empty_value_display = '-пусто-'
 
@@ -37,16 +50,20 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('name', 'color', 'slug')
+    list_display = (
+        'color',
+        'name',
+        'slug'
+    )
     search_fields = ('name', 'slug')
-    list_filter = ('name', )
+    list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 
 class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'measurement_unit')
-    search_fields = ('name', )
-    list_filter = ('name', )
+    search_fields = ('name',)
+    list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 
@@ -60,11 +77,11 @@ class FavoriteAdmin(admin.ModelAdmin):
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('recipe', 'user')
     list_filter = ('recipe', 'user')
-    search_fields = ('user', )
+    search_fields = ('user',)
     empty_value_display = '-пусто-'
 
 
-admin.site.register(Tag, TagAdmin)
-admin.site.register(Favorite, FavoriteAdmin)
 admin.site.register(ShoppingCart, ShoppingCartAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
+admin.site.register(Favorite, FavoriteAdmin)
+admin.site.register(Tag, TagAdmin)

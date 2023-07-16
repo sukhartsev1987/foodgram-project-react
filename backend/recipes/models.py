@@ -1,8 +1,7 @@
 from django.conf import settings
 from django.core.validators import (
     MaxValueValidator,
-    MinValueValidator,
-    # RegexValidator
+    MinValueValidator
 )
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -27,7 +26,7 @@ class Ingredient(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['name', 'measurement_unit'],
-                name='unique_name_measurement_unit'
+                name='name_measurement_unit_unique'
             )
         ]
 
@@ -44,15 +43,8 @@ class Tag(models.Model):
     )
     color = models.CharField(
         verbose_name='HEX-код',
-        # format='hex',
         max_length=7,
-        unique=True,
-        # validators=[
-        #     RegexValidator(
-        #         regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
-        #         message='Проверьте вводимый формат',
-        #     )
-        # ],
+        unique=True
     )
     slug = models.SlugField(
         max_length=settings.LENGTH_TEXT_150,
@@ -120,13 +112,12 @@ class FavoriteShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Пользователь',
-
+        verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт',
+        verbose_name='Рецепт'
     )
 
     class Meta:
@@ -171,11 +162,14 @@ class IngredientRecipe(models.Model):
         related_name='ingredienttorecipe'
     )
     amount = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1)],
-        verbose_name='Количество ингредиента'
+        verbose_name='Количество ингредиента',
+        validators=[MinValueValidator(1)]
     )
 
     class Meta:
         ordering = ('-id',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты рецепта'
+
+    def __str__(self):
+        return f'{self.ingredient}({self.amount})'
