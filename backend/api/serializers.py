@@ -65,12 +65,12 @@ class SubscribeListSerializer(UserSerializer):
             'email',
             'id'
         )
-        # read_only_fields = (
-        #     'first_name',
-        #     'last_name',
-        #     'username',
-        #     'email'
-        # )
+        read_only_fields = (
+            'first_name',
+            'last_name',
+            'username',
+            'email'
+        )
 
     def validate(self, data):
         author_id = self.context.get(

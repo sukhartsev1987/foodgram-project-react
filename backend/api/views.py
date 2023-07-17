@@ -138,7 +138,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class UserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # pagination_class = PageLimitPagination
+    pagination_class = PageLimitPagination
 
     @action(
         detail=True,
