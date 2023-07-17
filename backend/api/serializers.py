@@ -57,7 +57,7 @@ class SubscribeListSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         fields = (
             'is_subscribed',
-            'recipes_count', 
+            'recipes_count',
             'first_name',
             'last_name',
             'username',
