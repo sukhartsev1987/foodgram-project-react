@@ -8,28 +8,29 @@ app_name = 'api'
 route_v1 = DefaultRouter()
 
 route_v1.register(
-    r'ingredients',
+    'ingredients',
     IngredientViewSet,
     basename='ingredients'
 )
 route_v1.register(
-    r'recipes',
+    'recipes',
     RecipeViewSet,
     basename='recipes'
 )
 route_v1.register(
-    r'users',
+    'users',
     UserViewSet,
     basename='users'
 )
 route_v1.register(
-    r'tags',
+    'tags',
     TagViewSet,
     basename='tags'
 )
 
 
 urlpatterns = [
+    path('users/<int:user_id>/subscribe/', UserViewSet.as_view()),
     path('', include(route_v1.urls)),
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),

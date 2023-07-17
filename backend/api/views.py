@@ -148,7 +148,6 @@ class UserViewSet(UserViewSet):
     def subscribe(self, request, id):
         author = get_object_or_404(User, pk=id)
         user = request.user
-
         if request.method == 'POST':
             serializer = SubscribeListSerializer(
                 author,
