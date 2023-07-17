@@ -174,3 +174,4 @@ class IngredientRecipe(models.Model):
 
     def __str__(self):
         return f'{self.ingredient}({self.amount})'
+
