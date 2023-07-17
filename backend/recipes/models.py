@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.core.validators import (
     MaxValueValidator,
-    MinValueValidator
+    MinValueValidator,
+    RegexValidator
 )
 from django.db import models
 from django.db.models import UniqueConstraint
@@ -26,7 +27,7 @@ class Ingredient(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['name', 'measurement_unit'],
-                name='name_measurement_unit_unique'
+                name='unique_name_measurement_unit'
             )
         ]
 
@@ -43,8 +44,15 @@ class Tag(models.Model):
     )
     color = models.CharField(
         verbose_name='HEX-код',
+        format='hex',
         max_length=7,
-        unique=True
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+                message='Проверьте вводимый формат',
+            )
+        ],
     )
     slug = models.SlugField(
         max_length=settings.LENGTH_TEXT_150,
@@ -163,14 +171,11 @@ class IngredientRecipe(models.Model):
         related_name='ingredienttorecipe'
     )
     amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество ингредиента',
-        validators=[MinValueValidator(1)]
+        validators=[MinValueValidator(1)],
+        verbose_name='Количество ингредиента'
     )
 
     class Meta:
         ordering = ('-id',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты рецепта'
-
-    def __str__(self):
-        return f'{self.ingredient}({self.amount})'

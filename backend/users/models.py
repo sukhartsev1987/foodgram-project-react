@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.db.models import F, Q, UniqueConstraint
 
@@ -29,10 +29,7 @@ class User(AbstractUser):
         verbose_name='username',
         max_length=settings.LENGTH_TEXT_150,
         unique=True,
-        validators=[RegexValidator(
-            regex=r'^[\w.@+-]+$',
-            message='Имя пользователя содержит недопустимый символ'
-        )]
+        validators=(UnicodeUsernameValidator(),)
     )
 
     class Meta:
@@ -59,6 +56,7 @@ class Follow(models.Model):
     )
 
     class Meta:
+        ordering = ('-id', )
         constraints = [
             UniqueConstraint(
                 fields=('user', 'author'),
@@ -72,5 +70,5 @@ class Follow(models.Model):
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.user} подписан на {self.author}"

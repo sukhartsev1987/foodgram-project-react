@@ -49,6 +49,51 @@ class TagViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
+class UserViewSet(UserViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    pagination_class = PageLimitPagination
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
+    def subscribe(self, request, id):
+        author = get_object_or_404(User, pk=id)
+        user = request.user
+
+        if request.method == 'POST':
+            serializer = SubscribeListSerializer(
+                author,
+                data=request.data,
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            Follow.objects.create(user=user, author=author)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        if request.method == 'DELETE':
+            get_object_or_404(
+                Follow,
+                user=user,
+                author=author
+            ).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        user = request.user
+        queryset = User.objects.filter(following__user=user)
+        pages = self.paginate_queryset(queryset)
+        serializer = SubscribeListSerializer(
+            pages,
+            many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
+
+
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = CreateRecipeSerializer
@@ -92,8 +137,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context = {'request': request}
         recipe = get_object_or_404(Recipe, id=pk)
         data = {
-            'user': request.user.id,
-            'recipe': recipe.id
+            'recipe': recipe.id,
+            'user': request.user.id
         }
         serializer = ShoppingCartSerializer(data=data, context=context)
         serializer.is_valid(raise_exception=True)
@@ -117,8 +162,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context = {"request": request}
         recipe = get_object_or_404(Recipe, id=pk)
         data = {
-            'user': request.user.id,
-            'recipe': recipe.id
+            'recipe': recipe.id,
+            'user': request.user.id
         }
         serializer = FavoriteSerializer(data=data, context=context)
         serializer.is_valid(raise_exception=True)
@@ -133,47 +178,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=request.user
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class UserViewSet(UserViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    pagination_class = PageLimitPagination
-
-    @action(
-        detail=True,
-        methods=['post', 'delete'],
-        # permission_classes=[IsAuthenticated]
-    )
-    def subscribe(self, request, id):
-        author = get_object_or_404(User, pk=id)
-        user = request.user
-        if request.method == 'POST':
-            serializer = SubscribeListSerializer(
-                author,
-                data=request.data,
-                context={'request': request}
-            )
-            serializer.is_valid(raise_exception=True)
-            Follow.objects.create(user=user, author=author)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            get_object_or_404(
-                Follow,
-                user=user,
-                author=author
-            ).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=False, permission_classes=[IsAuthenticated])
-    def subscriptions(self, request):
-        user = request.user
-        queryset = User.objects.filter(following__user=user)
-        pages = self.paginate_queryset(queryset)
-        serializer = SubscribeListSerializer(
-            pages,
-            many=True,
-            context={'request': request}
-        )
-        return self.get_paginated_response(serializer.data)
