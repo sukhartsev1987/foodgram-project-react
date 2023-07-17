@@ -108,54 +108,46 @@ class Recipe(models.Model):
         return self.name
 
 
-class Favorite(models.Model):
+class FavoriteShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        verbose_name='Пользователь',
+
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт'
+        verbose_name='Рецепт',
     )
 
     class Meta:
+        abstract = True
+        constraints = [
+            UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='%(app_label)s_%(class)s_unique'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} :: {self.recipe}'
+
+
+class Favorite(FavoriteShoppingCart):
+
+    class Meta(FavoriteShoppingCart.Meta):
+        default_related_name = 'favorites'
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
-        constraints = [
-            UniqueConstraint(
-                fields=['user', 'recipe'], name='unique_favorite'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.user} {self.recipe}'
 
 
-class ShoppingCart(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Пользователь'
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт'
-    )
+class ShoppingCart(FavoriteShoppingCart):
 
-    class Meta:
-        verbose_name = 'Список покупок'
-        verbose_name_plural = 'Список покупок'
-        constraints = [
-            UniqueConstraint(
-                fields=['user', 'recipe'], name='unique_shopping_cart'
-            )
-        ]
-
-    def __str__(self):
-        return f'{self.user} {self.recipe}'
+    class Meta(FavoriteShoppingCart.Meta):
+        default_related_name = 'shopping_list'
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзина'
 
 
 class IngredientRecipe(models.Model):
