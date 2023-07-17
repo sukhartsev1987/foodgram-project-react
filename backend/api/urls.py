@@ -8,22 +8,22 @@ app_name = 'api'
 route_v1 = DefaultRouter()
 
 route_v1.register(
-    'ingredients',
+    r'ingredients',
     IngredientViewSet,
     basename='ingredients'
 )
 route_v1.register(
-    'recipes',
+    r'recipes',
     RecipeViewSet,
     basename='recipes'
 )
 route_v1.register(
-    'users',
+    r'users',
     UserViewSet,
     basename='users'
 )
 route_v1.register(
-    'tags',
+    r'tags',
     TagViewSet,
     basename='tags'
 )
