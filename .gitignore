@@ -130,5 +130,7 @@ dmypy.json
 
 # .idea
 .idea
+
+# static
 .static
-static
+static/
