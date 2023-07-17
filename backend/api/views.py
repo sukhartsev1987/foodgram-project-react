@@ -35,20 +35,6 @@ from api.serializers import (
 )
 
 
-class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Ingredient.objects.all()
-    serializer_class = IngredientSerializer
-    filter_backends = (IngredientFilter,)
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-    search_fields = ('^name',)
-
-
-class TagViewSet(viewsets.ModelViewSet):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
-
-
 class UserViewSet(UserViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -94,6 +80,20 @@ class UserViewSet(UserViewSet):
         return self.get_paginated_response(serializer.data)
 
 
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    filter_backends = (IngredientFilter,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    search_fields = ('^name',)
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
+
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = CreateRecipeSerializer
@@ -137,8 +137,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context = {'request': request}
         recipe = get_object_or_404(Recipe, id=pk)
         data = {
-            'recipe': recipe.id,
-            'user': request.user.id
+            'user': request.user.id,
+            'recipe': recipe.id
         }
         serializer = ShoppingCartSerializer(data=data, context=context)
         serializer.is_valid(raise_exception=True)
@@ -162,8 +162,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context = {"request": request}
         recipe = get_object_or_404(Recipe, id=pk)
         data = {
-            'recipe': recipe.id,
-            'user': request.user.id
+            'user': request.user.id,
+            'recipe': recipe.id
         }
         serializer = FavoriteSerializer(data=data, context=context)
         serializer.is_valid(raise_exception=True)

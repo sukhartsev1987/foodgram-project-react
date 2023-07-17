@@ -207,19 +207,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'id'
         )
 
-    def validate_cooking_time(self, cooking_time):
-        if cooking_time < 1:
-            raise serializers.ValidationError(
-                'Время готовки должно быть не меньше одной минуты')
-        return cooking_time
-
-    def validate_tags(self, tags):
-        for tag in tags:
-            if not Tag.objects.filter(id=tag.id).exists():
-                raise serializers.ValidationError(
-                    'Такого тега не существует')
-        return tags
-
     def validate_ingredients(self, ingredients):
         ingredients_list = []
         if not ingredients:
@@ -310,6 +297,12 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = ('user', 'recipe')
 
+    def to_representation(self, instance):
+        return RecipeShortSerializer(
+            instance.recipe,
+            context={'request': self.context.get('request')}
+        ).data
+
     def validate(self, data):
         user = data['user']
         if user.favorites.filter(recipe=data['recipe']).exists():
@@ -317,9 +310,3 @@ class FavoriteSerializer(serializers.ModelSerializer):
                 'Рецепт уже добавлен в избранное.'
             )
         return data
-
-    def to_representation(self, instance):
-        return RecipeShortSerializer(
-            instance.recipe,
-            context={'request': self.context.get('request')}
-        ).data
