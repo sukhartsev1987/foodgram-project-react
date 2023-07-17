@@ -30,7 +30,6 @@ route_v1.register(
 
 
 urlpatterns = [
-    path('users/subscribe/', UserViewSet.as_view({'get': 'list'})),
     path('', include(route_v1.urls)),
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),

@@ -143,7 +143,7 @@ class UserViewSet(UserViewSet):
     @action(
         detail=True,
         methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated]
+        # permission_classes=[IsAuthenticated]
     )
     def subscribe(self, request, id):
         author = get_object_or_404(User, pk=id)
