@@ -10,7 +10,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         )
 
 
-class AdminAuthorOrReadOnly(permissions.BasePermission):
+class IsAdminAuthorOrReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return (

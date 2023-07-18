@@ -6,32 +6,23 @@ from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
-    help = "Загрузка данных из файла backend/data/ingredients.csv"
 
     def handle(self, *args, **kwargs):
-        try:
-            if Ingredient.objects.exists():
-                self.stdout.write("Данные уже загружены в базу данных.")
-                return
 
-            csv_file_path = "data/ingredients.csv"
-            self._load_ingredients(csv_file_path)
-
-            self.stdout.write("Данные успешно загружены в базу данных.")
-        except FileNotFoundError:
-            error_message = "Файл ingredients.csv не найден."
-            self.stdout.write(self.style.ERROR(error_message))
-        except Exception as e:
-            error_message = f"Произошла ошибка: {str(e)}"
-            self.stdout.write(self.style.ERROR(error_message))
+        if Ingredient.objects.exists():
+            self.stdout.write("Данные были загружены ранее.")
+            return
+        path_csv = "data/ingredients.csv"
+        self._import_ingredients(path_csv)
+        self.stdout.write("Данные успешно загружены.")
 
     @staticmethod
-    def _load_ingredients(csv_file_path):
-        with open(csv_file_path, encoding="utf-8") as csvfile:
-            csvreader = csv.reader(csvfile)
-            next(csvreader)
-            for row in csvreader:
+    def _import_ingredients(path_csv):
+        with open(path_csv, encoding="utf-8") as csvfile:
+            reader_csv = csv.reader(csvfile)
+            next(reader_csv)
+            for row in reader_csv:
                 Ingredient.objects.create(
                     name=row[0],
-                    measurement_unit=row[1],
+                    measurement_unit=row[1]
                 )

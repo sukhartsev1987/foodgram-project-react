@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from users.models import Follow, User
 from api.pagination import PageNumberLimitPagination
 from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import AdminAuthorOrReadOnly, IsAdminOrReadOnly
+from api.permissions import IsAdminAuthorOrReadOnly, IsAdminOrReadOnly
 from api.serializers import (
     CreateRecipeSerializer,
     ShoppingCartSerializer,
@@ -89,7 +89,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = CreateRecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_classes = (AdminAuthorOrReadOnly,)
+    permission_classes = (IsAdminAuthorOrReadOnly,)
     pagination_class = PageNumberLimitPagination
 
     def get_serializer_class(self):

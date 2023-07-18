@@ -6,15 +6,15 @@ from recipes.models import Recipe, Ingredient, Tag
 
 class RecipeFilter(FilterSet):
     tags = filters.ModelMultipleChoiceFilter(
-        to_field_name='slug',
-        field_name='tags__slug',
         queryset=Tag.objects.all(),
-    )
-    is_favorited = filters.NumberFilter(
-        method='filter_is_favorited'
+        field_name='tags__slug',
+        to_field_name='slug'
     )
     is_in_shopping_cart = filters.NumberFilter(
         method='filter_is_in_shopping_cart'
+    )
+    is_favorited = filters.NumberFilter(
+        method='filter_is_favorited'
     )
 
     class Meta:
@@ -34,7 +34,7 @@ class RecipeFilter(FilterSet):
     def filter_is_in_shopping_cart(self, queryset, name, value):
         if value and self.request.user.is_authenticated:
             return queryset.filter(shopping_list__user=self.request.user)
-        return
+        return queryset
 
 
 class IngredientFilter(SearchFilter):
