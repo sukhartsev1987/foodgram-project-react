@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Tag
 from rest_framework import serializers
 from users.models import Follow, User
 
@@ -55,7 +55,7 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='ingredient.id')
 
     class Meta:
-        model = IngredientInRecipe
+        model = IngredientRecipe
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
@@ -144,8 +144,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         return data
 
     def create_ingredients(self, ingredients, recipe):
-        IngredientInRecipe.objects.bulk_create(
-            [IngredientInRecipe(
+        IngredientRecipe.objects.bulk_create(
+            [IngredientRecipe(
                 recipe=recipe,
                 ingredient_id=ingredient.get('ingredient').get('id'),
                 amount=ingredient.get('amount')
@@ -165,7 +165,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         tags_data = validated_data.pop('tags')
         instance.tags.set(tags_data)
-        IngredientInRecipe.objects.filter(recipe=instance).delete()
+        IngredientRecipe.objects.filter(recipe=instance).delete()
         self.create_ingredients(
             validated_data.pop('ingredientinrecipe_set'),
             instance
