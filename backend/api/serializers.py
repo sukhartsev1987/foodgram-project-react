@@ -55,7 +55,8 @@ class SubscribeListSerializer(UserSerializer):
     recipes = SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ('recipes_count', 'recipes')
+        fileds = '__all__'
+        # fields = UserSerializer.Meta.fields + ('recipes_count', 'recipes')
         read_only_fields = (
             'first_name',
             'last_name',
