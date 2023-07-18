@@ -13,9 +13,6 @@ from djoser.views import UserViewSet
 from recipes.models import (ShoppingCart, Favorite, Ingredient,
                             IngredientRecipe,
                             Recipe, Tag)
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -139,35 +136,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.delete_recipe(ShoppingCart, request.user, pk)
         return None
 
-    @action(detail=False, methods=['get'],
-            permission_classes=[IsAuthenticated])
+    @staticmethod
+    def send_message(ingredients):
+        shopping_list = 'Купить в магазине:'
+        for ingredient in ingredients:
+            shopping_list += (
+                f"\n{ingredient['ingredient__name']} "
+                f"({ingredient['ingredient__measurement_unit']}) - "
+                f"{ingredient['amount']}")
+        file = 'shopping_list.txt'
+        response = HttpResponse(shopping_list, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
+        return response
+
+    @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
-            recipe__cart__user=request.user).values_list(
-            'ingredient__name', 'ingredient__measurement_unit',
-            'amount')
-        counted_ingredients = ingredients.values(
-            'ingredient__name', 'ingredient__measurement_unit').annotate(
-            total=Sum('amount'))
-        pdfmetrics.registerFont(
-            TTFont('Montserrat', 'Montserrat.ttf', 'UTF-8'))
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = ('attachment; '
-                                           'filename="shopping_list.pdf"')
-        page = canvas.Canvas(response)
-        page.setFont('Montserrat', size=24)
-        page.drawCentredString(200, 800, PDF_HEADER)
-        page.setFont('Montserrat', size=16)
-        height = 750
-        for ingredient in counted_ingredients:
-            page.drawString(75, height, (
-                f'{ingredient["ingredient__name"]} - {ingredient["total"]}, '
-                f'{ingredient["ingredient__measurement_unit"]}'
-            ))
-            height -= 25
-        page.showPage()
-        page.save()
-        return response
+            recipe__shopping_list__user=request.user
+        ).order_by('ingredient__name').values(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(amount=Sum('amount'))
+        return self.send_message(ingredients)
 
 
 class TagViewSet(viewsets.ModelViewSet):
