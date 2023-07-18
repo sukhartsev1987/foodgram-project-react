@@ -56,29 +56,29 @@ class SubscribeListSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ('recipes_count', 'recipes')
-        # read_only_fields = (
-        #     'first_name',
-        #     'last_name',
-        #     'username',
-        #     'email'
-        # )
+        read_only_fields = (
+            'first_name',
+            'last_name',
+            'username',
+            'email'
+        )
 
-    def validate(self, data):
-        author_id = self.context.get(
-            'request').parser_context.get('kwargs').get('id')
-        user = self.context.get('request').user
-        author = get_object_or_404(User, id=author_id)
-        if user.follower.filter(author=author_id).exists():
-            raise ValidationError(
-                detail='Подписка уже существует',
-                code=status.HTTP_400_BAD_REQUEST,
-            )
-        if user == author:
-            raise ValidationError(
-                detail='Нельзя подписаться на себя',
-                code=status.HTTP_400_BAD_REQUEST,
-            )
-        return data
+    # def validate(self, data):
+    #     author_id = self.context.get(
+    #         'request').parser_context.get('kwargs').get('id')
+    #     user = self.context.get('request').user
+    #     author = get_object_or_404(User, id=author_id)
+    #     if user.follower.filter(author=author_id).exists():
+    #         raise ValidationError(
+    #             detail='Подписка уже существует',
+    #             code=status.HTTP_400_BAD_REQUEST,
+    #         )
+    #     if user == author:
+    #         raise ValidationError(
+    #             detail='Нельзя подписаться на себя',
+    #             code=status.HTTP_400_BAD_REQUEST,
+    #         )
+    #     return data
 
     def get_recipes(self, obj):
         request = self.context.get('request')
