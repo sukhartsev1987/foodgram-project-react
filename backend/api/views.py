@@ -180,7 +180,7 @@ class TagViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    filter_backends = IngredientFilter
+    filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
