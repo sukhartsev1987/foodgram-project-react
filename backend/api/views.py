@@ -1,39 +1,35 @@
-from api.filters import IngredientFilter, RecipeFilter
-from api.pagination import PageNumberLimitPagination
-from api.permissions import IsAdminOrReadOnly, AuthorAdminOrReadOnly
-from api.serializers import (
-    CustomUserSerializer,
-    FollowSerializer,
-    IngredientSerializer,
-    CreateRecipeSerializer,
-    TagSerializer,
-    RecipeReadSerializer,
-    ShoppingCartSerializer,
-    FavoriteSerializer
-)
-from django.db.models import Sum
-from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.db.models import Sum
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (ShoppingCart, Favorite, Ingredient,
-                            IngredientRecipe,
-                            Recipe, Tag)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from api.filters import IngredientFilter, RecipeFilter
+from api.pagination import PageNumberLimitPagination
+from api.permissions import IsAdminOrReadOnly, AuthorAdminOrReadOnly
+from api.serializers import (
+    CreateRecipeSerializer,
+    ShoppingCartSerializer,
+    CustomUserSerializer,
+    IngredientSerializer,
+    RecipeReadSerializer,
+    FavoriteSerializer,
+    FollowSerializer,
+    TagSerializer,
+)
+from recipes.models import (
+    IngredientRecipe,
+    ShoppingCart,
+    Ingredient,
+    Favorite,
+    Recipe,
+    Tag
+)
 from users.models import Follow, User
-
-# User = get_user_model()
-
-SELFSUBSCRIPTION = 'Вы не можете подписываться на самого себя'
-SUBSCRIBED_ALREADY = 'Вы уже подписаны на данного пользователя'
-SELFUNSUBSCRIPTION = 'Вы не можете отписываться от самого себя'
-UNSUBSCRIBED_ALREADY = 'Вы уже отписались'
-RECIPE_IN_FAVORITES = 'Рецепт уже добавлен в список'
-RECIPE_REMOVED = 'Рецепт уже удален'
-PDF_HEADER = 'Список ингредиентов'
 
 
 class CustomUserViewSet(UserViewSet):
@@ -50,13 +46,12 @@ class CustomUserViewSet(UserViewSet):
         if request.method == 'POST':
             if user == author:
                 return Response({
-                    'errors': SELFSUBSCRIPTION
+                    'errors': 'Вы не можете подписываться на самого себя'
                 }, status=status.HTTP_400_BAD_REQUEST)
             if Follow.objects.filter(user=user, author=author).exists():
                 return Response({
-                    'errors': SUBSCRIBED_ALREADY
+                    'errors': 'Вы уже подписаны на данного пользователя'
                 }, status=status.HTTP_400_BAD_REQUEST)
-
             follow = Follow.objects.create(user=user, author=author)
             serializer = FollowSerializer(
                 follow, context={'request': request}
@@ -65,15 +60,14 @@ class CustomUserViewSet(UserViewSet):
         if request.method == 'DELETE':
             if user == author:
                 return Response({
-                    'errors': SELFUNSUBSCRIPTION
+                    'errors': 'Вы на себя не подписаны'
                 }, status=status.HTTP_400_BAD_REQUEST)
             follow = Follow.objects.filter(user=user, author=author)
             if follow.exists():
                 follow.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
-
             return Response({
-                'errors': UNSUBSCRIBED_ALREADY
+                'errors': 'Вы уже отписались'
             }, status=status.HTTP_400_BAD_REQUEST)
         return 'forbidden method'
 
@@ -105,7 +99,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return CreateRecipeSerializer
 
     @staticmethod
-    def send_message(ingredients):
+    def send_txt(ingredients):
         shopping_list = 'Купить в магазине:'
         for ingredient in ingredients:
             shopping_list += (
@@ -124,7 +118,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).order_by('ingredient__name').values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(amount=Sum('amount'))
-        return self.send_message(ingredients)
+        return self.send_txt(ingredients)
 
     @action(
         detail=True,
