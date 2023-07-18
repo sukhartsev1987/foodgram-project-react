@@ -1,8 +1,7 @@
-from django.conf import settings
-from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.db import models
-from django.db.models import F, Q, UniqueConstraint
 
 
 class User(AbstractUser):
@@ -33,7 +32,7 @@ class User(AbstractUser):
     )
 
     class Meta:
-        ordering = ('username', )
+        ordering = ('username',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
@@ -56,19 +55,15 @@ class Follow(models.Model):
     )
 
     class Meta:
-        ordering = ('-id', )
+        ordering = ('-id',)
         constraints = [
-            UniqueConstraint(
+            models.UniqueConstraint(
                 fields=('user', 'author'),
                 name='unique_follow'
-            ),
-            models.CheckConstraint(
-                check=~Q(user=F('author')),
-                name='no_self_follow'
             )
         ]
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
 
-    def __str__(self) -> str:
+    def __str__(self):
         return f"{self.user} подписан на {self.author}"
