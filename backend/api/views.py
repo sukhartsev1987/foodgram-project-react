@@ -99,6 +99,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeReadSerializer
         return CreateRecipeSerializer
 
+    @staticmethod
     def send_txt(ingredients):
         shopping_list = ['Купить в магазине:']
         for ingredient in ingredients:
@@ -113,7 +114,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         file_content = '\n'.join(shopping_list)
         file_name = 'shopping_list.txt'
         response = HttpResponse(file_content, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+        response['Content-Disposition'] = (
+            f'attachment; filename="{file_name}.txt"'
+        )
         return response
 
     # @staticmethod
@@ -136,7 +139,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_list__user=request.user
         ).order_by('ingredient__name').values(
-            'ingredient__name', 'ingredient__measurement_unit'
+            'ingredient__name',
+            'ingredient__measurement_unit'
         ).annotate(amount=Sum('amount'))
         return self.send_txt(ingredients)
 
