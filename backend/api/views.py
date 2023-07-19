@@ -18,8 +18,8 @@ from api.serializers import (
     CustomUserSerializer,
     IngredientSerializer,
     RecipeReadSerializer,
+    SubscribeSerializer,
     FavoriteSerializer,
-    FollowSerializer,
     TagSerializer,
 )
 from recipes.models import (

@@ -4,7 +4,7 @@ from .models import User, Subscribe
 
 
 @admin.register(Subscribe)
-class FollowerAdmin(admin.ModelAdmin):
+class SubscribeAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',
