@@ -99,32 +99,22 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
-
-    id = serializers.IntegerField()
-    amount = serializers.IntegerField()
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all()
+    )
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit'
+    )
 
     class Meta:
-        model = Ingredient
-        fields = ('id', 'amount')
-
-
-# class IngredientRecipeSerializer(serializers.ModelSerializer):
-#     name = serializers.ReadOnlyField(source='ingredient.name')
-#     id = serializers.PrimaryKeyRelatedField(
-#         queryset=Ingredient.objects.all()
-#     )
-#     measurement_unit = serializers.ReadOnlyField(
-#         source='ingredient.measurement_unit'
-#     )
-
-#     class Meta:
-#         model = IngredientRecipe
-#         fields = (
-#             'measurement_unit',
-#             'amount',
-#             'name',
-#             'id'
-#         )
+        model = IngredientRecipe
+        fields = (
+            'measurement_unit',
+            'amount',
+            'name',
+            'id'
+        )
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
