@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import User, Subscribe
+from .models import User, Follow
 
 
-@admin.register(Subscribe)
-class SubscribeAdmin(admin.ModelAdmin):
+@admin.register(Follow)
+class FollowerAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'user',

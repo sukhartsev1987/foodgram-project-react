@@ -8,7 +8,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from users.models import Subscribe, User
+from users.models import Follow, User
 from api.pagination import PageNumberLimitPagination
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAdminAuthorOrReadOnly, IsAdminOrReadOnly
@@ -18,8 +18,8 @@ from api.serializers import (
     CustomUserSerializer,
     IngredientSerializer,
     RecipeReadSerializer,
-    SubscribeSerializer,
     FavoriteSerializer,
+    FollowSerializer,
     TagSerializer,
 )
 from recipes.models import (
@@ -97,18 +97,18 @@ class CustomUserViewSet(UserViewSet):
             #     return Response({
             #         'errors': 'Вы не можете подписываться на самого себя'
             #     }, status=status.HTTP_400_BAD_REQUEST)
-            if Subscribe.objects.filter(user=user, author=author).exists():
+            if Follow.objects.filter(user=user, author=author).exists():
                 return Response({
                     'errors': 'Вы уже подписаны на данного пользователя'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            follow = Subscribe.objects.create(user=user, author=author)
-            serializer = SubscribeSerializer(
+            follow = Follow.objects.create(user=user, author=author)
+            serializer = FollowSerializer(
                 follow, context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             subscription = get_object_or_404(
-                Subscribe,
+                Follow,
                 user=user,
                 author=author
             )
@@ -119,9 +119,9 @@ class CustomUserViewSet(UserViewSet):
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         user = request.user
-        queryset = Subscribe.objects.filter(user=user)
+        queryset = Follow.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
-        serializer = SubscribeSerializer(
+        serializer = FollowSerializer(
             pages,
             many=True,
             context={'request': request}

@@ -2,7 +2,7 @@ from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from users.models import Subscribe, User
+from users.models import Follow, User
 from recipes.models import (
     IngredientRecipe,
     ShoppingCart,
@@ -33,7 +33,7 @@ class CustomUserSerializer(UserSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Subscribe.objects.filter(user=user, author=obj.id).exists()
+        return Follow.objects.filter(user=user, author=obj.id).exists()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -228,7 +228,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         return obj.shopping_list.filter(user=request.user).exists()
 
 
-class SubscribeSerializer(serializers.ModelSerializer):
+class FollowSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
     first_name = serializers.ReadOnlyField(source='author.first_name')
@@ -239,7 +239,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='author.id')
 
     class Meta:
-        model = Subscribe
+        model = Follow
         fields = (
             'is_subscribed',
             'recipes_count',
@@ -252,7 +252,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        return Subscribe.objects.filter(
+        return Follow.objects.filter(
             user=obj.user, author=obj.author
         ).exists()
 
