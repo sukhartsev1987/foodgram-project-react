@@ -194,6 +194,6 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     filter_backends = (IngredientFilter,)
     # filterset_class = IngredientFilter
-    # search_fields = ('^name',)
+    search_fields = ('^name',)
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
