@@ -147,14 +147,18 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 'Время готовки должно быть не меньше одной минуты')
         return cooking_time
 
-    def create_ingredients(self, ingredients, recipe):
-        IngredientRecipe.objects.bulk_create(
-            [IngredientRecipe(
-                recipe=recipe,
-                ingredient_id=ingredient.get('ingredient').get('id'),
-                amount=ingredient.get('amount')
-            ) for ingredient in ingredients]
-        )
+    @staticmethod
+    def create_ingredients(recipe, ingredients):
+        ingredient_liist = []
+        for ingredient_data in ingredients:
+            ingredient_liist.append(
+                IngredientRecipe(
+                    ingredient=ingredient_data.pop('id'),
+                    amount=ingredient_data.pop('amount'),
+                    recipe=recipe,
+                )
+            )
+        IngredientRecipe.objects.bulk_create(ingredient_liist)
 
     def create(self, validated_data):
         request = self.context.get('request', None)
