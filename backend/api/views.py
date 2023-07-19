@@ -99,18 +99,37 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeReadSerializer
         return CreateRecipeSerializer
 
-    @staticmethod
     def send_txt(ingredients):
-        shopping_list = 'Купить в магазине:'
+        shopping_list = ['Купить в магазине:']
         for ingredient in ingredients:
-            shopping_list += (
-                f"\n{ingredient['ingredient__name']} "
-                f"({ingredient['ingredient__measurement_unit']}) - "
-                f"{ingredient['amount']}")
-        file = 'shopping_list.txt'
-        response = HttpResponse(shopping_list, content_type='text/plain')
-        response['Content-Disposition'] = f'attachment; filename="{file}.txt"'
+            ingredient_name = ingredient.get('ingredient__name', '')
+            measurement_unit = ingredient.get(
+                'ingredient__measurement_unit', ''
+            )
+            amount = ingredient.get('amount', '')
+            shopping_list.append(
+                f'{ingredient_name} ({measurement_unit}) - {amount}'
+            )
+        file_content = '\n'.join(shopping_list)
+        file_name = 'shopping_list.txt'
+        response = HttpResponse(file_content, content_type='text/plain')
+        response['Content-Disposition'] = f'attachment; filename="{file_name}"'
         return response
+
+    # @staticmethod
+    # def send_txt(ingredients):
+    #     shopping_list = 'Купить в магазине: '
+    #     for ingredient in ingredients:
+    #         shopping_list += (
+    #             f"\n{ingredient['ingredient__name']} "
+    #             f"({ingredient['ingredient__measurement_unit']}) - "
+    #             f"{ingredient['amount']}")
+    #     file = 'shopping_list.txt'
+    #     response = HttpResponse(shopping_list, content_type='text/plain')
+    #     response['Content-Disposition'] = (
+    #       f'attachment; filename="{file}.txt"'
+    #           )
+    #     return response
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
@@ -124,7 +143,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=[IsAuthenticated])
+        permission_classes=[IsAuthenticated]
+    )
     def shopping_cart(self, request, pk):
         context = {'request': request}
         recipe = get_object_or_404(Recipe, id=pk)
@@ -149,7 +169,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=[IsAuthenticated])
+        permission_classes=[IsAuthenticated]
+    )
     def favorite(self, request, pk):
         context = {"request": request}
         recipe = get_object_or_404(Recipe, id=pk)
