@@ -38,16 +38,19 @@ class CustomUserViewSet(UserViewSet):
     pagination_class = PageNumberLimitPagination
     lookup_field = 'id'
 
-    @action(detail=True, methods=['post', 'delete'],
-            permission_classes=[IsAuthenticated])
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated]
+    )
     def subscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
-            # if user == author:
-            #     return Response({
-            #         'errors': 'Вы не можете подписываться на самого себя'
-            #     }, status=status.HTTP_400_BAD_REQUEST)
+            if user == author:
+                return Response({
+                    'errors': 'Вы не можете подписываться на самого себя'
+                }, status=status.HTTP_400_BAD_REQUEST)
             if Follow.objects.filter(user=user, author=author).exists():
                 return Response({
                     'errors': 'Вы уже подписаны на данного пользователя'
@@ -66,8 +69,11 @@ class CustomUserViewSet(UserViewSet):
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=False, methods=['get'],
-            permission_classes=[IsAuthenticated])
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=[IsAuthenticated]
+    )
     def subscriptions(self, request):
         user = request.user
         queryset = Follow.objects.filter(user=user)
