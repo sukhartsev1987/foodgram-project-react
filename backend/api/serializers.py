@@ -14,7 +14,6 @@ from recipes.models import (
 
 
 class CustomUserSerializer(UserSerializer):
-
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
@@ -194,7 +193,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     image = Base64ImageField(max_length=None)
     ingredients = IngredientRecipeSerializer(
         many=True,
-        source='ingredienttorecipe')
+        source='ingredienttorecipe'
+    )
 
     class Meta:
         model = Recipe
