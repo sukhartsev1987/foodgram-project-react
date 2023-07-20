@@ -119,7 +119,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeSerializer(
-        many=True, 
+        many=True,
     )
     tags = serializers.PrimaryKeyRelatedField(
         many=True,

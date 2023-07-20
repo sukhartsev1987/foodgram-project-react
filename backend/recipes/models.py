@@ -154,8 +154,7 @@ class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        verbose_name='Ингредиент',
-        related_name='ingredienttorecipe'
+        verbose_name='Ингредиент'
     )
     recipe = models.ForeignKey(
         Recipe,
