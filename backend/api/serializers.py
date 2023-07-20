@@ -143,12 +143,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'id'
         )
 
-    def validate_cooking_time(self, cooking_time):
-        if cooking_time < 1:
-            raise serializers.ValidationError(
-                'Время готовки должно быть не меньше одной минуты')
-        return cooking_time
-
     @staticmethod
     def create_ingredients(recipe, ingredients):
         ingredient_liist = []
