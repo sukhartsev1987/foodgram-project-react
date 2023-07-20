@@ -145,7 +145,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         )
 
     @transaction.atomic
-    def create_ingredients(self, recipe, ingredients):
+    def create_ingredients(self,recipe, ingredients):
         ingredient_liist = []
         for ingredient_data in ingredients:
             ingredient_liist.append(
