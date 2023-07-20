@@ -5,13 +5,16 @@ from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.permissions import (
+    IsAuthenticatedOrReadOnly,
+    IsAuthenticated
+)
 
 from users.models import Follow, User
 from api.pagination import PageNumberLimitPagination
 from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import IsAdminAuthorOrReadOnly, IsAdminOrReadOnly
+from api.permissions import AuthorPermission
 from api.serializers import (
     CreateRecipeSerializer,
     ShoppingCartSerializer,
@@ -40,8 +43,8 @@ class CustomUserViewSet(UserViewSet):
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated]
+        methods=('post', 'delete',),
+        permission_classes=(IsAuthenticated,)
     )
     def subscribe(self, request, id=None):
         user = request.user
@@ -71,8 +74,8 @@ class CustomUserViewSet(UserViewSet):
 
     @action(
         detail=False,
-        methods=['get'],
-        permission_classes=[IsAuthenticated]
+        methods=('get',),
+        permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
         user = request.user
@@ -88,10 +91,10 @@ class CustomUserViewSet(UserViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
+    permission_classes = (AuthorPermission,)
     serializer_class = CreateRecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-    permission_classes = (IsAdminAuthorOrReadOnly,)
     pagination_class = PageNumberLimitPagination
 
     def get_serializer_class(self):
@@ -119,7 +122,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         return response
 
-    @action(detail=False, methods=['GET'])
+    @action(detail=False, methods=('GET',))
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_list__user=request.user
@@ -132,7 +135,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated,)
     )
     def shopping_cart(self, request, pk):
         context = {'request': request}
@@ -158,7 +161,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=('POST',),
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk):
         context = {"request": request}
@@ -185,15 +188,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
-    permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = None
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
     filter_backends = (IngredientFilter,)
-    # filterset_class = IngredientFilter
     search_fields = ('^name',)
-    permission_classes = (IsAdminOrReadOnly,)
-    pagination_class = None
+    permission_classes = (IsAuthenticatedOrReadOnly,)
