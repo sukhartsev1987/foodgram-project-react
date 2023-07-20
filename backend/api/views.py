@@ -6,15 +6,12 @@ from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import (
-    IsAuthenticatedOrReadOnly,
-    IsAuthenticated
-)
+from rest_framework.permissions import IsAuthenticated
 
 from users.models import Follow, User
 from api.pagination import PageNumberLimitPagination
 from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import AuthorPermission
+from api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 from api.serializers import (
     CreateRecipeSerializer,
     ShoppingCartSerializer,
@@ -91,7 +88,7 @@ class CustomUserViewSet(UserViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (AuthorPermission,)
+    permission_classes = (IsAuthorOrReadOnly | IsAdminOrReadOnly,)
     serializer_class = CreateRecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -188,7 +185,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -196,4 +193,4 @@ class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
