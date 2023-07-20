@@ -119,7 +119,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeSerializer(
-        many=True,
+        many=True, source='ingredienttorecipe'
     )
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -158,7 +158,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request', None)
-        ingredients = validated_data.pop('ingredients')
+        ingredients = validated_data.pop('ingredienttorecipe')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(author=request.user, **validated_data)
         recipe.tags.set(tags)
@@ -166,7 +166,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients = validated_data.pop('ingredients')
+        ingredients = validated_data.pop('ingredienttorecipe')
         tags = validated_data.pop('tags')
         instance.tags.clear()
         instance.tags.set(tags)
