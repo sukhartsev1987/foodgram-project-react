@@ -13,7 +13,7 @@ from rest_framework.permissions import (
 
 from users.models import Follow, User
 from api.pagination import PageNumberLimitPagination
-from api.filters import IngredientSearchFilter, RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import AuthorPermission
 from api.serializers import (
     CreateRecipeSerializer,
@@ -194,6 +194,6 @@ class TagViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    filter_backends = (IngredientSearchFilter,)
+    filter_backends = (IngredientFilter,)
     search_fields = ('^name',)
     permission_classes = (IsAuthenticatedOrReadOnly,)
