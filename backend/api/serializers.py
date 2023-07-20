@@ -99,11 +99,12 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source='ingredient.id', read_only=True)
-    name = serializers.CharField(source='ingredient.name', read_only=True)
-    measurement_unit = serializers.CharField(
-        source='ingredient.measurement_unit',
-        read_only=True
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all()
+    )
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit'
     )
 
     class Meta:
@@ -118,7 +119,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientRecipeSerializer(
-        many=True, source='ingredienttorecipe'
+        many=True, 
     )
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -165,15 +166,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients = validated_data.pop('recipeingredients')
-        tags = validated_data.pop('tags')
         instance.tags.clear()
-        instance.tags.set(tags)
         IngredientRecipe.objects.filter(recipe=instance).delete()
-        super().update(instance, validated_data)
-        self.create_ingredients(ingredients, instance)
-        instance.save()
-        return instance
+        instance.tags.set(validated_data.pop('tags'))
+        ingredients = validated_data.pop('ingredients')
+        self.create_ingredients(instance, ingredients)
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context={
