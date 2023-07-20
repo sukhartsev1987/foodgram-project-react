@@ -1,3 +1,4 @@
+from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -143,8 +144,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'id'
         )
 
-    @staticmethod
-    def create_ingredients(recipe, ingredients):
+    @transaction.atomic
+    def create_ingredients(self, recipe, ingredients):
         ingredient_liist = []
         for ingredient_data in ingredients:
             ingredient_liist.append(
@@ -156,15 +157,19 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             )
         IngredientRecipe.objects.bulk_create(ingredient_liist)
 
+    @transaction.atomic
     def create(self, validated_data):
-        request = self.context.get('request', None)
-        ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(author=request.user, **validated_data)
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
-        self.create_ingredients(recipe, ingredients)
+        self.create_ingredients(
+            recipe=recipe,
+            ingredients=ingredients
+        )
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
