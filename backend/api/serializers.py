@@ -144,35 +144,34 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'id'
         )
 
+    def create_ingredients(self, recipe, ingredients):
+        ingredient_list = []
+        for ingredient_data in ingredients:
+            ingredient_list.append(
+                IngredientRecipe(
+                    ingredient=ingredient_data.pop("id"),
+                    amount=ingredient_data.pop("amount"),
+                    recipe=recipe,
+                )
+            )
+        IngredientRecipe.objects.bulk_create(ingredient_list)
+
     def create(self, validated_data):
-        ingredients_data = validated_data.pop("ingredients")
+        ingredients = validated_data.pop("ingredients")
         tags_data = validated_data.pop("tags")
         recipe = Recipe.objects.create(
             author=self.context["request"].user, **validated_data
         )
-        tags = Tag.objects.filter(id__in=[tag.id for tag in tags_data])
-        recipe.tags.set(tags)
-        for ingredient_data in ingredients_data:
-            IngredientRecipe.objects.create(
-                ingredient=ingredient_data["ingredient"]["id"],
-                amount=ingredient_data["amount"],
-                recipe=recipe,
-            )
+        recipe.tags.set(tags_data)
+        self.create_ingredients(recipe, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
         instance.tags.clear()
         IngredientRecipe.objects.filter(recipe=instance).delete()
-        tags_data = validated_data.pop("tags")
-        tags = Tag.objects.filter(id__in=[tag.id for tag in tags_data])
-        instance.tags.set(tags)
-        ingredients_data = validated_data.pop("ingredients")
-        for ingredient_data in ingredients_data:
-            IngredientRecipe.objects.create(
-                ingredient=ingredient_data["ingredient"]["id"],
-                amount=ingredient_data["amount"],
-                recipe=instance,
-            )
+        instance.tags.set(validated_data.pop('tags'))
+        ingredients = validated_data.pop('ingredients')
+        self.create_ingredients(instance, ingredients)
         return super().update(instance, validated_data)
 
     def to_representation(self, instance):
