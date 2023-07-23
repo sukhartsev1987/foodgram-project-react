@@ -161,7 +161,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         for ingredient_data in ingredients_data:
             IngredientRecipe.objects.create(recipe=instance, **ingredient_data)
         return instance
-        
+
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
 
