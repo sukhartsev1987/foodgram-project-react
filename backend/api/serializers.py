@@ -119,14 +119,17 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
-    ingredients = IngredientRecipeSerializer(many=True)
+    ingredients = IngredientRecipeSerializer(
+        many=True,
+    )
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all(),
         error_messages={'does_not_exist': 'Такого тега не существует'}
     )
-    image = serializers.ImageField(max_length=None)
-    author = serializers.ReadOnlyField(source='author.username')
+    image = Base64ImageField(max_length=None)
+    author = CustomUserSerializer(read_only=True)
+    cooking_time = serializers.IntegerField()
 
     class Meta:
         model = Recipe
