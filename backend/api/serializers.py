@@ -119,17 +119,14 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
-    ingredients = IngredientRecipeSerializer(
-        many=True,
-    )
+    ingredients = IngredientRecipeSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all(),
         error_messages={'does_not_exist': 'Такого тега не существует'}
     )
-    image = Base64ImageField(max_length=None)
-    author = CustomUserSerializer(read_only=True)
-    cooking_time = serializers.IntegerField()
+    image = serializers.ImageField(max_length=None)
+    author = serializers.ReadOnlyField(source='author.username')
 
     class Meta:
         model = Recipe
@@ -144,48 +141,95 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'id'
         )
 
-    @transaction.atomic
-    def create_ingredients(self, recipe, ingredients):
-        ingredient_liist = []
-        for ingredient_data in ingredients:
-            ingredient_liist.append(
-                IngredientRecipe(
-                    ingredient=ingredient_data.pop('id'),
-                    amount=ingredient_data.pop('amount'),
-                    recipe=recipe,
-                )
-            )
-        IngredientRecipe.objects.bulk_create(ingredient_liist)
-
-    @transaction.atomic
     def create(self, validated_data):
-        request = self.context.get('request', None)
-        ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(author=request.user, **validated_data)
-        recipe.tags.set(tags)
-        self.create_ingredients(recipe, ingredients)
+        ingredients_data = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
+        recipe = Recipe.objects.create(author=self.context['request'].user, **validated_data)
+        recipe.tags.set(tags_data)
+        for ingredient_data in ingredients_data:
+            IngredientRecipe.objects.create(recipe=recipe, **ingredient_data)
         return recipe
 
-    @transaction.atomic
     def update(self, instance, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
+        ingredients_data = validated_data.pop('ingredients')
         instance = super().update(instance, validated_data)
-        instance.tags.clear()
-        instance.tags.set(tags)
-        instance.ingredients.clear()
-        self.create_ingredients(
-            recipe=instance,
-            ingredients=ingredients
-        )
-        instance.save()
+        instance.tags.set(tags_data)s
+        instance.ingredients.all().delete()
+        for ingredient_data in ingredients_data:
+            IngredientRecipe.objects.create(recipe=instance, **ingredient_data)
         return instance
 
     def to_representation(self, instance):
-        return RecipeReadSerializer(instance, context={
-            'request': self.context.get('request')
-        }).data
+        return RecipeReadSerializer(instance, context=self.context).data
+        
+    # ingredients = IngredientRecipeSerializer(
+    #     many=True,
+    # )
+    # tags = serializers.PrimaryKeyRelatedField(
+    #     many=True,
+    #     queryset=Tag.objects.all(),
+    #     error_messages={'does_not_exist': 'Такого тега не существует'}
+    # )
+    # image = Base64ImageField(max_length=None)
+    # author = CustomUserSerializer(read_only=True)
+    # cooking_time = serializers.IntegerField()
+
+    # class Meta:
+    #     model = Recipe
+    #     fields = (
+    #         'cooking_time',
+    #         'ingredients',
+    #         'author',
+    #         'image',
+    #         'name',
+    #         'text',
+    #         'tags',
+    #         'id'
+    #     )
+
+    # @transaction.atomic
+    # def create_ingredients(self, recipe, ingredients):
+    #     ingredient_liist = []
+    #     for ingredient_data in ingredients:
+    #         ingredient_liist.append(
+    #             IngredientRecipe(
+    #                 ingredient=ingredient_data.pop('id'),
+    #                 amount=ingredient_data.pop('amount'),
+    #                 recipe=recipe,
+    #             )
+    #         )
+    #     IngredientRecipe.objects.bulk_create(ingredient_liist)
+
+    # @transaction.atomic
+    # def create(self, validated_data):
+    #     request = self.context.get('request', None)
+    #     ingredients = validated_data.pop('ingredients')
+    #     tags = validated_data.pop('tags')
+    #     recipe = Recipe.objects.create(author=request.user, **validated_data)
+    #     recipe.tags.set(tags)
+    #     self.create_ingredients(recipe, ingredients)
+    #     return recipe
+
+    # @transaction.atomic
+    # def update(self, instance, validated_data):
+    #     tags = validated_data.pop('tags')
+    #     ingredients = validated_data.pop('ingredients')
+    #     instance = super().update(instance, validated_data)
+    #     instance.tags.clear()
+    #     instance.tags.set(tags)
+    #     instance.ingredients.clear()
+    #     self.create_ingredients(
+    #         recipe=instance,
+    #         ingredients=ingredients
+    #     )
+    #     instance.save()
+    #     return instance
+
+    # def to_representation(self, instance):
+    #     return RecipeReadSerializer(instance, context={
+    #         'request': self.context.get('request')
+    #     }).data
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
