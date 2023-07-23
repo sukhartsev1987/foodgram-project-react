@@ -1,4 +1,4 @@
-from django.db import transaction
+# from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
@@ -144,7 +144,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
-        recipe = Recipe.objects.create(author=self.context['request'].user, **validated_data)
+        recipe = Recipe.objects.create(
+            author=self.context['request'].user, **validated_data
+        )
         recipe.tags.set(tags_data)
         for ingredient_data in ingredients_data:
             IngredientRecipe.objects.create(recipe=recipe, **ingredient_data)
@@ -159,10 +161,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         for ingredient_data in ingredients_data:
             IngredientRecipe.objects.create(recipe=instance, **ingredient_data)
         return instance
-
+        
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
-        
+
     # ingredients = IngredientRecipeSerializer(
     #     many=True,
     # )
