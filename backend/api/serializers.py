@@ -155,7 +155,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 )
             )
         IngredientRecipe.objects.bulk_create(ingredient_liist)
-    
+
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
@@ -163,7 +163,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             author=self.context['request'].user, **validated_data
         )
         recipe.tags.set(tags_data)
-        self.create_ingredients(recipe, ingredients)
+        self.create_ingredients(recipe, ingredients_data)
         return recipe
 
     def update(self, instance, validated_data):
@@ -174,7 +174,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         instance.ingredients.all().delete()
         self.create_ingredients(
             recipe=instance,
-            ingredients=ingredients
+            ingredients=ingredients_data
         )
         instance.save()
         return instance
