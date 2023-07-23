@@ -144,9 +144,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'id'
         )
 
-    def create_ingredients(self, recipe, ingredients):
+    def create_ingredients(self, recipe, ingredients_data):
         ingredient_liist = []
-        for ingredient_data in ingredients:
+        for ingredient_data in ingredients_data:
             ingredient_liist.append(
                 IngredientRecipe(
                     ingredient=ingredient_data.pop('id'),
