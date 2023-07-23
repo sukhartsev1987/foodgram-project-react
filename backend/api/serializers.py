@@ -176,8 +176,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 amount=ingredient_data["amount"],
                 recipe=instance,
             )
-
         return super().update(instance, validated_data)
+
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
 
