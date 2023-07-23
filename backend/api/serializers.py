@@ -144,6 +144,18 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'id'
         )
 
+    def create_ingredients(self, recipe, ingredients):
+        ingredient_liist = []
+        for ingredient_data in ingredients:
+            ingredient_liist.append(
+                IngredientRecipe(
+                    ingredient=ingredient_data.pop('id'),
+                    amount=ingredient_data.pop('amount'),
+                    recipe=recipe,
+                )
+            )
+        IngredientRecipe.objects.bulk_create(ingredient_liist)
+    
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
@@ -151,8 +163,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             author=self.context['request'].user, **validated_data
         )
         recipe.tags.set(tags_data)
-        for ingredient_data in ingredients_data:
-            IngredientRecipe.objects.create(recipe=recipe, **ingredient_data)
+        self.create_ingredients(recipe, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
@@ -161,8 +172,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         instance.tags.set(tags_data)
         instance.ingredients.all().delete()
-        for ingredient_data in ingredients_data:
-            IngredientRecipe.objects.create(recipe=instance, **ingredient_data)
+        self.create_ingredients(
+            recipe=instance,
+            ingredients=ingredients
+        )
+        instance.save()
         return instance
 
     def to_representation(self, instance):
