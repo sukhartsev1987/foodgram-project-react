@@ -99,8 +99,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeReadSerializer
         return CreateRecipeSerializer
 
-    @staticmethod
-    def create_list_of_products(ingredients):
+    def create_list_of_products(self, ingredients):
         list_of_products = ["Купить в магазине:"]
         for ingredient in ingredients:
             ingredient_name = ingredient.get("ingredient__name", "")
