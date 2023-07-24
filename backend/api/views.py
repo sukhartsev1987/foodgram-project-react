@@ -162,7 +162,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=True, methods=["DELETE"])
+    @action(
+        detail=True, methods=["DELETE"], permission_classes=[IsAuthenticated]
+    )
     def destroy_favorite(self, request, pk):
         get_object_or_404(
             Favorite,
