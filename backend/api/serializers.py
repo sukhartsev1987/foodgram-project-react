@@ -177,7 +177,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             validated_data
         )
 
-    return instance
         # instance.tags.clear()
         # tags = validated_data.pop('tags')
         # instance.tags.set(tags)
