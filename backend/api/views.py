@@ -153,24 +153,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(
-        detail=True,
-        methods=('POST',),
-        permission_classes=(IsAuthenticated,)
-    )
+    @action(detail=True, methods=("POST"),)
     def favorite(self, request, pk):
-        context = {"request": request}
         recipe = get_object_or_404(Recipe, id=pk)
-        data = {
-            'recipe': recipe.id,
-            'user': request.user.id
-        }
-        serializer = FavoriteSerializer(data=data, context=context)
+        data = {"recipe": recipe.id, "user": request.user.id}
+        serializer = FavoriteSerializer(
+            data=data, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @favorite.mapping.delete
+    @action(detail=True, methods=("DELETE"),)
     def destroy_favorite(self, request, pk):
         get_object_or_404(
             Favorite,
@@ -178,6 +172,32 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=request.user
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # @action(
+    #     detail=True,
+    #     methods=('POST',),
+    #     permission_classes=(IsAuthenticated,)
+    # )
+    # def favorite(self, request, pk):
+    #     context = {"request": request}
+    #     recipe = get_object_or_404(Recipe, id=pk)
+    #     data = {
+    #         'recipe': recipe.id,
+    #         'user': request.user.id
+    #     }
+    #     serializer = FavoriteSerializer(data=data, context=context)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # @favorite.mapping.delete
+    # def destroy_favorite(self, request, pk):
+    #     get_object_or_404(
+    #         Favorite,
+    #         recipe=get_object_or_404(Recipe, id=pk),
+    #         user=request.user
+    #     ).delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TagViewSet(viewsets.ModelViewSet):
