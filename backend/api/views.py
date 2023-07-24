@@ -86,7 +86,8 @@ class CustomUserViewSet(UserViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthorOrReadOnly | IsAdminOrReadOnly,)
+    # permission_classes = (IsAuthorOrReadOnly | IsAdminOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = CreateRecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -98,58 +99,54 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return CreateRecipeSerializer
 
     @staticmethod
-    def send_txt(ingredients):
-        shopping_list = ['Купить в магазине:']
+    def create_list_of_products(ingredients):
+        list_of_products = ["Купить в магазине:"]
         for ingredient in ingredients:
-            ingredient_name = ingredient.get('ingredient__name', '')
+            ingredient_name = ingredient.get("ingredient__name", "")
             measurement_unit = ingredient.get(
-                'ingredient__measurement_unit', ''
+                "ingredient__measurement_unit", ""
             )
-            amount = ingredient.get('amount', '')
-            shopping_list.append(
-                f'{ingredient_name} ({measurement_unit}) - {amount}'
+            amount = ingredient.get("amount", "")
+            list_of_products.append(
+                f"{ingredient_name} ({measurement_unit}) - {amount}"
             )
-        file_content = '\n'.join(shopping_list)
-        file_name = 'shopping_list.txt'
-        response = HttpResponse(file_content, content_type='text/plain')
-        response['Content-Disposition'] = (
-            f'attachment; filename="{file_name}.txt"'
-        )
-        return response
+        return "\n".join(list_of_products)
 
-    @action(detail=False, methods=('GET',))
+    @action(detail=False, methods=("GET",))
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_list__user=request.user
-        ).order_by('ingredient__name').values(
-            'ingredient__name',
-            'ingredient__measurement_unit'
+        ).order_by("ingredient__name").values(
+            "ingredient__name",
+            "ingredient__measurement_unit"
         ).annotate(amount=Sum('amount'))
-        return self.send_txt(ingredients)
+        shopping_list_content = self.create_list_of_products(ingredients)
+        file_name = "list_of_products.txt"
+        response = HttpResponse(
+            shopping_list_content,
+            content_type='text/plain'
+        )
+        response["Content-Disposition"] = f'attachment; filename="{file_name}"'
+        return response
 
-    @action(
-        detail=True,
-        methods=('POST',),
-        permission_classes=(IsAuthenticated,)
-    )
+    @action(detail=True, methods=("POST"))
     def shopping_cart(self, request, pk):
-        context = {'request': request}
         recipe = get_object_or_404(Recipe, id=pk)
-        data = {
-            'recipe': recipe.id,
-            'user': request.user.id
-        }
-        serializer = ShoppingCartSerializer(data=data, context=context)
+        data = {"recipe": recipe.id, "user": request.user.id}
+        serializer = ShoppingCartSerializer(
+            data=data,
+            context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @shopping_cart.mapping.delete
+    @action(detail=True, methods=("DELETE"),)
     def destroy_shopping_cart(self, request, pk):
         get_object_or_404(
             ShoppingCart,
-            recipe=get_object_or_404(Recipe, id=pk),
-            user=request.user.id
+            recipe__id=pk,
+            user=request.user
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -172,6 +169,62 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=request.user
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # @staticmethod
+    # def send_txt(ingredients):
+    #     shopping_list = ['Купить в магазине:']
+    #     for ingredient in ingredients:
+    #         ingredient_name = ingredient.get('ingredient__name', '')
+    #         measurement_unit = ingredient.get(
+    #             'ingredient__measurement_unit', ''
+    #         )
+    #         amount = ingredient.get('amount', '')
+    #         shopping_list.append(
+    #             f'{ingredient_name} ({measurement_unit}) - {amount}'
+    #         )
+    #     file_content = '\n'.join(shopping_list)
+    #     file_name = 'shopping_list.txt'
+    #     response = HttpResponse(file_content, content_type='text/plain')
+    #     response['Content-Disposition'] = (
+    #         f'attachment; filename="{file_name}.txt"'
+    #     )
+    #     return response
+
+    # @action(detail=False, methods=('GET',))
+    # def download_shopping_cart(self, request):
+    #     ingredients = IngredientRecipe.objects.filter(
+    #         recipe__shopping_list__user=request.user
+    #     ).order_by('ingredient__name').values(
+    #         'ingredient__name',
+    #         'ingredient__measurement_unit'
+    #     ).annotate(amount=Sum('amount'))
+    #     return self.send_txt(ingredients)
+
+    # @action(
+    #     detail=True,
+    #     methods=('POST',),
+    #     permission_classes=(IsAuthenticated,)
+    # )
+    # def shopping_cart(self, request, pk):
+    #     context = {'request': request}
+    #     recipe = get_object_or_404(Recipe, id=pk)
+    #     data = {
+    #         'recipe': recipe.id,
+    #         'user': request.user.id
+    #     }
+    #     serializer = ShoppingCartSerializer(data=data, context=context)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # @shopping_cart.mapping.delete
+    # def destroy_shopping_cart(self, request, pk):
+    #     get_object_or_404(
+    #         ShoppingCart,
+    #         recipe=get_object_or_404(Recipe, id=pk),
+    #         user=request.user.id
+    #     ).delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
     # @action(
     #     detail=True,
