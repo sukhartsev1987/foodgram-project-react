@@ -113,7 +113,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         return "\n".join(list_of_products)
 
-    @action(detail=False, methods=("GET",),)
+    @action(methods=("GET",),)
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_list__user=request.user
@@ -142,7 +142,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(detail=False, methods=("DELETE",),)
+    @shopping_cart.mapping.delete
     def destroy_shopping_cart(self, request, pk):
         get_object_or_404(
             ShoppingCart,
@@ -162,10 +162,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(
-        detail=False,
-        methods=("DELETE",),
-    )
+    @favorite.mapping.delete
     def destroy_favorite(self, request, pk):
         get_object_or_404(
             Favorite,
