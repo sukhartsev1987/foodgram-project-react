@@ -130,7 +130,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response["Content-Disposition"] = f'attachment; filename="{file_name}"'
         return response
 
-    @action(detail=True, methods=("POST"))
+    @action(detail=True, methods=("POST",))
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         data = {"recipe": recipe.id, "user": request.user.id}
@@ -151,7 +151,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=("POST"),)
+    @action(detail=True, methods=("POST",))
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         data = {"recipe": recipe.id, "user": request.user.id}
