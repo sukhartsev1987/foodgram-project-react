@@ -11,7 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from users.models import Follow, User
 from api.pagination import PageNumberLimitPagination
 from api.filters import IngredientFilter, RecipeFilter
-from api.permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from api.permissions import IsAdminOrReadOnly
+# , IsAuthorOrReadOnly
 from api.serializers import (
     CreateRecipeSerializer,
     ShoppingCartSerializer,
