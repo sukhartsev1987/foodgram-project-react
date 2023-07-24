@@ -170,12 +170,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         instance.tags.set(tags)
         instance.ingredients.clear()
-        ingredients = validated_data.pop('ingredients')
-        self.create_ingredients(instance, ingredients)
-        return super().update(
-            instance,
-            validated_data
-        )
+        ingredients = validated_data.pop('ingredients', None)
+        if ingredients is not None:
+            instance.ingredients.clear()
+            self.create_ingredients(instance, ingredients)
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
