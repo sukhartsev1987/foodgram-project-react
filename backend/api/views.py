@@ -113,7 +113,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         return "\n".join(list_of_products)
 
-    @action(methods=("GET",),)
+    @action(detail=False, methods=("GET",),)
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
             recipe__shopping_list__user=request.user
