@@ -173,6 +173,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         instance.ingredients.clear()
         self.create_ingredients(instance, ingredients)
         super().update(instance, validated_data)
+        instance.save()
         return instance
 
     def to_representation(self, instance):
